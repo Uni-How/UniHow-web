@@ -70,8 +70,8 @@ const AdmissionPlanSchema = new Schema({
 const DepartmentSchema = new Schema({
   department_id: { type: String, required: true },
   department_name: { type: String, required: true },
-  college: { type: String, required: true },
-  academic_group: { type: String, required: true }, // New: academic group classification
+  college: { type: String }, // Not required to handle empty strings in TEST1.json
+  academic_group: { type: String }, // Not required to handle empty strings in TEST1.json
   campus_ids: [{ type: String }], // Reference to School.campuses.campus_id
   department_description: { type: String },
   years_of_study: { type: Number },
