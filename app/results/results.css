@@ -1,0 +1,205 @@
+/* Results Page Layout - Custom Scroll Behavior */
+
+.results-page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+/* Header Area - with show/hide animation */
+.results-header {
+  flex-shrink: 0;
+  transition: transform 0.3s ease, opacity 0.2s ease;
+  z-index: 100;
+  background: var(--bg);
+}
+
+.results-header.visible {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.results-header.hidden {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+/* Main Content Area */
+.results-main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(500px, 2fr) minmax(360px, 1fr);
+  gap: 28px;
+  padding: 20px 48px 30px;
+  overflow: hidden;
+  transition: padding-top 0.3s ease;
+}
+
+.results-main.header-hidden {
+  /* When header is hidden, we have more space */
+}
+
+/* Left Panel: Contains Filter (sticky) + School List (scrolls) */
+.left-panel {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 24px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 8px;
+  /* Custom scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: #c5d3e0 transparent;
+}
+
+.left-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.left-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.left-panel::-webkit-scrollbar-thumb {
+  background-color: #c5d3e0;
+  border-radius: 3px;
+}
+
+/* Filter Wrapper - Sticky within left panel */
+.filter-wrapper {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #c5d3e0 transparent;
+}
+
+.filter-wrapper::-webkit-scrollbar {
+  width: 4px;
+}
+
+.filter-wrapper::-webkit-scrollbar-thumb {
+  background-color: #d0dce8;
+  border-radius: 2px;
+}
+
+/* Override sidebar styles for this context */
+.filter-wrapper .sidebar {
+  position: static;
+  max-height: none;
+  overflow: visible;
+}
+
+/* School List */
+.school-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: 20px;
+}
+
+.school-list .space-y-4 {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Right Panel: Detail Card (independent scroll) */
+.right-panel {
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: #c5d3e0 transparent;
+}
+
+.right-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.right-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.right-panel::-webkit-scrollbar-thumb {
+  background-color: #c5d3e0;
+  border-radius: 3px;
+}
+
+/* Override detail styles for this context */
+.right-panel .detail {
+  position: static;
+  height: auto;
+  min-height: 100%;
+  overflow: visible;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .results-main {
+    grid-template-columns: minmax(400px, 2fr) minmax(320px, 1fr);
+    padding: 20px 24px 30px;
+  }
+  
+  .left-panel {
+    grid-template-columns: 220px 1fr;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .results-page {
+    height: auto;
+    overflow: visible;
+  }
+  
+  .results-header {
+    position: sticky;
+    top: 0;
+  }
+  
+  .results-header.hidden {
+    position: sticky;
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+  
+  .results-main {
+    grid-template-columns: 1fr;
+    overflow: visible;
+    padding: 16px;
+  }
+  
+  .left-panel {
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+  }
+  
+  .filter-wrapper {
+    position: static;
+    max-height: none;
+    overflow: visible;
+  }
+  
+  .right-panel {
+    overflow: visible;
+    margin-top: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .results-main {
+    padding: 12px;
+  }
+}

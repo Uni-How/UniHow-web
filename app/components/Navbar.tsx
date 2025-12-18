@@ -1,10 +1,12 @@
 'use client';
 
+import Link from 'next/link';
+
 export default function Navbar() {
   return (
     <header className="navy-header">
       <div className="header-inner">
-        <div className="logo">UniHow</div>
+        <Link href="/" className="logo" style={{ fontFamily: "'BBH Hegarty', sans-serif", textDecoration: 'none', color: 'inherit' }}>UniHow</Link>
 
         <div className="header-right">
           <button className="icon-btn" aria-label="搜尋">

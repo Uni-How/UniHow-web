@@ -293,14 +293,6 @@ export default function SchoolDetail({ school }: SchoolDetailProps) {
           </div>
         </div>
       </div>
-
-      <div className="foot-note">
-        Collegeo ➜ <a href="#">查看全部</a>
-      </div>
-
-      <div className="small-note">
-        去年({selectedYear === '115' ? '114' : '113'})最低通過分與篩選順序
-      </div>
     </aside>
   );
 }

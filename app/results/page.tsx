@@ -6,6 +6,7 @@ import FilterSidebar from '../components/FilterSidebar';
 import SchoolCard from '../components/SchoolCard';
 import SchoolDetail from '../components/SchoolDetail';
 import { useSearchParams } from 'next/navigation';
+import './results.css';
 
 interface ISchool {
   _id: string;
@@ -253,89 +254,111 @@ function ResultsContent() {
     checkAndFetchDetail(school);
   };
 
+  // Scroll handling for header visibility
+  const [headerVisible, setHeaderVisible] = useState(true);
+  const lastScrollY = useRef(0);
+  const leftPanelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const leftPanel = leftPanelRef.current;
+    if (!leftPanel) return;
+
+    const handleScroll = () => {
+      const currentScrollY = leftPanel.scrollTop;
+      
+      // 向上捲動時顯示 header，向下捲動時隱藏
+      if (currentScrollY < lastScrollY.current) {
+        setHeaderVisible(true);
+      } else if (currentScrollY > lastScrollY.current && currentScrollY > 50) {
+        setHeaderVisible(false);
+      }
+      
+      lastScrollY.current = currentScrollY;
+    };
+
+    leftPanel.addEventListener('scroll', handleScroll, { passive: true });
+    return () => leftPanel.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
-    <>
-      <Navbar />
+    <div className="results-page">
+      {/* Fixed Header Area */}
+      <div className={`results-header ${headerVisible ? 'visible' : 'hidden'}`}>
+        <Navbar />
+      </div>
 
-      {/* Action Chips Row */}
-      <section className="actions-row">
-        <div className="tabs">
-          <button className="tab active">選校</button>
-          <button className="tab">選系</button>
-        </div>
-        <div className="actions">
-          <button className="chip">匯出表格</button>
-          <button className="chip">儲存搜尋結果</button>
-          <button className="chip">排序方式: 過篩機率</button>
-          <button className="chip ghost">進階搜尋</button>
-        </div>
-      </section>
-
-      {/* Main Content Grid */}
-      <main className="content twocol">
-        <FilterSidebar 
-          metadata={metadata}
-          selectedRegions={selectedRegions}
-          selectedGroups={selectedGroups}
-          filteredCount={totalCount} 
-          onToggleRegion={toggleRegion}
-          onToggleGroup={toggleGroup}
-          onClearFilters={() => {
-            setSelectedRegions([]);
-            setSelectedGroups([]);
-          }}
-        />
-
-        <section className="results">
-          <div className="mb-6 flex justify-between items-center">
-            <h2 className="text-xl font-bold text-gray-800">
-              篩選結果 : {totalCount} 所學校
-            </h2>
+      {/* Main Content Area */}
+      <main className={`results-main ${headerVisible ? 'header-visible' : 'header-hidden'}`}>
+        {/* Left Panel: Filter + School List (共同捲動) */}
+        <div className="left-panel" ref={leftPanelRef}>
+          <div className="filter-wrapper">
+            <FilterSidebar 
+              metadata={metadata}
+              selectedRegions={selectedRegions}
+              selectedGroups={selectedGroups}
+              filteredCount={totalCount} 
+              onToggleRegion={toggleRegion}
+              onToggleGroup={toggleGroup}
+              onClearFilters={() => {
+                setSelectedRegions([]);
+                setSelectedGroups([]);
+              }}
+            />
           </div>
 
-          <div className="space-y-4">
-             {filteredSchools.map((school) => (
-                <SchoolCard 
-                  key={school._id} 
-                  school={school} 
-                  isSelected={selectedSchool?._id === school._id}
-                  onClick={() => handleSchoolClick(school)}
-                />
-             ))}
-             
-             {/* Infinite Scroll Loading & Sentinel */}
-             {(isFetching) && (
-                <div className="py-4 text-center text-gray-500">
-                   載入更多資料...
+          <section className="school-list">
+            <div className="mb-6 flex justify-between items-center">
+              <h2 className="text-xl font-bold text-gray-800">
+                篩選結果 : {totalCount} 所學校
+              </h2>
+            </div>
+
+            <div className="space-y-4">
+               {filteredSchools.map((school) => (
+                  <SchoolCard 
+                    key={school._id} 
+                    school={school} 
+                    isSelected={selectedSchool?._id === school._id}
+                    onClick={() => handleSchoolClick(school)}
+                  />
+               ))}
+               
+               {/* Infinite Scroll Loading & Sentinel */}
+               {(isFetching) && (
+                  <div className="py-4 text-center text-gray-500">
+                     載入更多資料...
+                  </div>
+               )}
+               
+               <div ref={observerTarget} style={{ height: '20px', marginTop: '10px' }}></div>
+
+              {!isFetching && filteredSchools.length === 0 && schools.length > 0 && (
+                 <div className="text-center py-12 text-gray-500 bg-white rounded-lg shadow">
+                   符合條件的學校已被篩選移除 (請清除左側篩選)
+                 </div>
+              )}
+
+              {!isFetching && schools.length === 0 && (
+                <div className="text-center py-12 text-gray-500 bg-white rounded-lg shadow">
+                  沒有符合條件的學校
                 </div>
-             )}
-             
-             <div ref={observerTarget} style={{ height: '20px', marginTop: '10px' }}></div>
+              )}
+              
+              {!hasMore && schools.length > 0 && (
+                 <div className="text-center py-4 text-gray-400 text-sm">
+                    已經到底囉
+                 </div>
+              )}
+            </div>
+          </section>
+        </div>
 
-            {!isFetching && filteredSchools.length === 0 && schools.length > 0 && (
-               /* Special case: Data exists but filtered out by Sidebar */
-               <div className="text-center py-12 text-gray-500 bg-white rounded-lg shadow">
-                 符合條件的學校已被篩選移除 (請清除左側篩選)
-               </div>
-            )}
-
-            {!isFetching && schools.length === 0 && (
-              <div className="text-center py-12 text-gray-500 bg-white rounded-lg shadow">
-                沒有符合條件的學校
-              </div>
-            )}
-            
-            {!hasMore && schools.length > 0 && (
-               <div className="text-center py-4 text-gray-400 text-sm">
-                  已經到底囉
-               </div>
-            )}
-          </div>
-        </section>
-
-        <SchoolDetail school={selectedSchool} />
+        {/* Right Panel: Detail Card (獨立捲動) */}
+        <div className="right-panel">
+          <SchoolDetail school={selectedSchool} />
+        </div>
       </main>
-    </>
+    </div>
   );
 }
 
