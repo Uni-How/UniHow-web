@@ -6,6 +6,7 @@ import SchoolCard from '../components/SchoolCard';
 import SchoolDetail from '../components/SchoolDetail';
 import DepartmentList from '../components/DepartmentList';
 import CompactSearchBar from '../components/CompactSearchBar';
+import { SchoolCardSkeleton, DepartmentListSkeleton, SchoolDetailSkeleton } from '../components/Skeleton';
 import { useSearchParams } from 'next/navigation';
 import './results.css';
 
@@ -372,6 +373,16 @@ function ResultsContent() {
         <div className="left-panel" ref={leftPanelRef}>
           <section className="school-list">
             <div className="space-y-4">
+               {/* Initial Loading Skeletons */}
+               {isFetching && schools.length === 0 && (
+                  <>
+                    <SchoolCardSkeleton />
+                    <SchoolCardSkeleton />
+                    <SchoolCardSkeleton />
+                    <SchoolCardSkeleton />
+                  </>
+               )}
+               
                {filteredSchools.map((school) => (
                   <SchoolCard 
                     key={school._id} 
@@ -381,11 +392,12 @@ function ResultsContent() {
                   />
                ))}
                
-               {/* Infinite Scroll Loading & Sentinel */}
-               {(isFetching) && (
-                  <div className="py-4 text-center text-gray-500">
-                     載入更多資料...
-                  </div>
+               {/* Infinite Scroll Loading */}
+               {isFetching && schools.length > 0 && (
+                  <>
+                    <SchoolCardSkeleton />
+                    <SchoolCardSkeleton />
+                  </>
                )}
                
                <div ref={observerTarget} style={{ height: '20px', marginTop: '10px' }}></div>
@@ -413,22 +425,30 @@ function ResultsContent() {
 
         {/* Middle Panel: Department List (獨立捲動) */}
         <div className="middle-panel">
-          <DepartmentList
-            school={selectedSchool}
-            selectedYear={selectedYear}
-            selectedDeptIndex={selectedDeptIndex}
-            onSelectDept={setSelectedDeptIndex}
-            onYearChange={setSelectedYear}
-          />
+          {isFetching && schools.length === 0 ? (
+            <DepartmentListSkeleton />
+          ) : (
+            <DepartmentList
+              school={selectedSchool}
+              selectedYear={selectedYear}
+              selectedDeptIndex={selectedDeptIndex}
+              onSelectDept={setSelectedDeptIndex}
+              onYearChange={setSelectedYear}
+            />
+          )}
         </div>
 
         {/* Right Panel: Detail Card (獨立捲動) */}
         <div className="right-panel">
-          <SchoolDetail 
-            school={selectedSchool} 
-            selectedYear={selectedYear}
-            selectedDeptIndex={selectedDeptIndex}
-          />
+          {isFetching && schools.length === 0 ? (
+            <SchoolDetailSkeleton />
+          ) : (
+            <SchoolDetail 
+              school={selectedSchool} 
+              selectedYear={selectedYear}
+              selectedDeptIndex={selectedDeptIndex}
+            />
+          )}
         </div>
       </main>
     </div>

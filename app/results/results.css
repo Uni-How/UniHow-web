@@ -95,7 +95,7 @@
   display: grid;
   grid-template-columns: minmax(320px, 2fr) minmax(160px, 0.7fr) minmax(260px, 0.9fr);
   gap: 16px;
-  padding: 0 32px 30px;
+  padding: 0 32px;
   overflow: hidden;
   transition: padding-top 0.3s ease;
   position: relative;
@@ -229,7 +229,8 @@
   overflow-y: auto;
   overflow-x: hidden;
   padding-right: 8px;
-  max-height: calc(100vh - 160px);
+  padding-bottom: 20px;
+  height: 100%;
   /* Custom scrollbar */
   scrollbar-width: thin;
   scrollbar-color: #c5d3e0 transparent;
@@ -267,7 +268,8 @@
   overflow-y: auto;
   overflow-x: hidden;
   padding-right: 4px;
-  max-height: calc(100vh - 160px);
+  padding-bottom: 20px;
+  height: 100%;
   scrollbar-width: thin;
   scrollbar-color: #c5d3e0 transparent;
 }
@@ -298,7 +300,8 @@
   overflow-y: auto;
   overflow-x: hidden;
   padding-right: 4px;
-  max-height: calc(100vh - 160px);
+  padding-bottom: 20px;
+  height: 100%;
   scrollbar-width: thin;
   scrollbar-color: #c5d3e0 transparent;
 }
