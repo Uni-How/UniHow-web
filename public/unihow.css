@@ -90,7 +90,14 @@ body{
 .checklist input[type="checkbox"]{width:18px;height:18px;border:1px solid #BFCFD9;border-radius:4px}
 
 /* Results list */
-.results{display:grid;gap:16px}
+.results{
+  display:grid;
+  gap:16px;
+  max-height:calc(100vh - 250px);
+  overflow-y:auto;
+  overflow-x:hidden;
+  padding-right:8px;
+}
 .card{background:var(--paper);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}
 .card.horiz{display:flex;gap:18px;padding:18px}
 .thumb{flex:0 0 220px}
