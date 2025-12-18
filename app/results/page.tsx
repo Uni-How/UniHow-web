@@ -5,6 +5,7 @@ import Navbar from '../components/Navbar';
 import FilterSidebar from '../components/FilterSidebar';
 import SchoolCard from '../components/SchoolCard';
 import SchoolDetail from '../components/SchoolDetail';
+import DepartmentList from '../components/DepartmentList';
 import { useSearchParams } from 'next/navigation';
 import './results.css';
 
@@ -51,6 +52,10 @@ function ResultsContent() {
   const [filteredSchools, setFilteredSchools] = useState<ISchool[]>([]);
   
   const [selectedSchool, setSelectedSchool] = useState<ISchool | null>(null);
+  
+  // 新增：科系選擇狀態 (從 SchoolDetail 提升到這裡)
+  const [selectedYear, setSelectedYear] = useState<'114' | '115'>('114');
+  const [selectedDeptIndex, setSelectedDeptIndex] = useState<number>(0);
   
   // Pagination State (分頁狀態)
   const [page, setPage] = useState(1);
@@ -251,6 +256,7 @@ function ResultsContent() {
 
   const handleSchoolClick = (school: ISchool) => {
     setSelectedSchool(school);
+    setSelectedDeptIndex(0); // 重置科系選擇
     checkAndFetchDetail(school);
   };
 
@@ -258,6 +264,9 @@ function ResultsContent() {
   const [headerVisible, setHeaderVisible] = useState(true);
   const lastScrollY = useRef(0);
   const leftPanelRef = useRef<HTMLDivElement>(null);
+  
+  // Filter panel state
+  const [filterOpen, setFilterOpen] = useState(false);
 
   useEffect(() => {
     const leftPanel = leftPanelRef.current;
@@ -279,6 +288,28 @@ function ResultsContent() {
     leftPanel.addEventListener('scroll', handleScroll, { passive: true });
     return () => leftPanel.removeEventListener('scroll', handleScroll);
   }, []);
+  
+  // Close filter panel when clicking outside or pressing Escape
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setFilterOpen(false);
+    };
+    
+    if (filterOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'hidden'; // Prevent body scroll when filter open
+    } else {
+      document.body.style.overflow = '';
+    }
+    
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = '';
+    };
+  }, [filterOpen]);
+  
+  // Calculate active filter count
+  const activeFilterCount = selectedRegions.length + selectedGroups.length;
 
   return (
     <div className="results-page">
@@ -287,32 +318,54 @@ function ResultsContent() {
         <Navbar />
       </div>
 
+      {/* Filter Overlay */}
+      <div 
+        className={`filter-overlay ${filterOpen ? 'visible' : ''}`}
+        onClick={() => setFilterOpen(false)}
+      />
+
+      {/* Filter Panel (Floating) */}
+      <div className={`filter-panel ${filterOpen ? 'open' : ''}`}>
+        <div className="filter-panel-header">
+          <h3>篩選條件</h3>
+          <button className="filter-close-btn" onClick={() => setFilterOpen(false)}>×</button>
+        </div>
+        <div className="filter-panel-content">
+          <FilterSidebar 
+            metadata={metadata}
+            selectedRegions={selectedRegions}
+            selectedGroups={selectedGroups}
+            filteredCount={totalCount} 
+            onToggleRegion={toggleRegion}
+            onToggleGroup={toggleGroup}
+            onClearFilters={() => {
+              setSelectedRegions([]);
+              setSelectedGroups([]);
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Results Toolbar */}
+      <div className="results-toolbar">
+        <h2>篩選結果 : {totalCount} 所學校</h2>
+        <button 
+          className="filter-toggle-btn"
+          onClick={() => setFilterOpen(true)}
+        >
+          <span className="filter-icon">☰</span>
+          <span>進階篩選</span>
+          {activeFilterCount > 0 && (
+            <span className="filter-count">{activeFilterCount}</span>
+          )}
+        </button>
+      </div>
+
       {/* Main Content Area */}
       <main className={`results-main ${headerVisible ? 'header-visible' : 'header-hidden'}`}>
-        {/* Left Panel: Filter + School List (共同捲動) */}
+        {/* Left Panel: School List (獨立捲動) */}
         <div className="left-panel" ref={leftPanelRef}>
-          <div className="filter-wrapper">
-            <FilterSidebar 
-              metadata={metadata}
-              selectedRegions={selectedRegions}
-              selectedGroups={selectedGroups}
-              filteredCount={totalCount} 
-              onToggleRegion={toggleRegion}
-              onToggleGroup={toggleGroup}
-              onClearFilters={() => {
-                setSelectedRegions([]);
-                setSelectedGroups([]);
-              }}
-            />
-          </div>
-
           <section className="school-list">
-            <div className="mb-6 flex justify-between items-center">
-              <h2 className="text-xl font-bold text-gray-800">
-                篩選結果 : {totalCount} 所學校
-              </h2>
-            </div>
-
             <div className="space-y-4">
                {filteredSchools.map((school) => (
                   <SchoolCard 
@@ -353,9 +406,24 @@ function ResultsContent() {
           </section>
         </div>
 
+        {/* Middle Panel: Department List (獨立捲動) */}
+        <div className="middle-panel">
+          <DepartmentList
+            school={selectedSchool}
+            selectedYear={selectedYear}
+            selectedDeptIndex={selectedDeptIndex}
+            onSelectDept={setSelectedDeptIndex}
+            onYearChange={setSelectedYear}
+          />
+        </div>
+
         {/* Right Panel: Detail Card (獨立捲動) */}
         <div className="right-panel">
-          <SchoolDetail school={selectedSchool} />
+          <SchoolDetail 
+            school={selectedSchool} 
+            selectedYear={selectedYear}
+            selectedDeptIndex={selectedDeptIndex}
+          />
         </div>
       </main>
     </div>

@@ -31,29 +31,176 @@
   right: 0;
 }
 
-/* Main Content Area */
+/* Results Toolbar - 篩選結果標題列 */
+.results-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 32px;
+  flex-shrink: 0;
+}
+
+.results-toolbar h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+}
+
+.results-toolbar .filter-toggle-btn {
+  position: static;
+  box-shadow: none;
+  border: 1px solid var(--line, #E6EEF6);
+  padding: 6px 12px;
+  font-size: 0.85rem;
+}
+
+.results-toolbar .filter-toggle-btn:hover {
+  background: #f5f8fb;
+  box-shadow: 0 2px 6px rgba(11,34,64,0.1);
+}
+
+/* Main Content Area - 三欄布局 */
 .results-main {
   flex: 1;
   display: grid;
-  grid-template-columns: minmax(500px, 2fr) minmax(360px, 1fr);
-  gap: 28px;
-  padding: 20px 48px 30px;
+  grid-template-columns: minmax(320px, 2fr) minmax(160px, 0.7fr) minmax(260px, 0.9fr);
+  gap: 16px;
+  padding: 0 32px 30px;
   overflow: hidden;
   transition: padding-top 0.3s ease;
+  position: relative;
+  align-items: start;
 }
 
 .results-main.header-hidden {
   /* When header is hidden, we have more space */
 }
 
-/* Left Panel: Contains Filter (sticky) + School List (scrolls) */
+/* Filter Toggle Button (inline version) */
+.filter-toggle-btn {
+  background: #fff;
+  border: 1px solid var(--line, #E6EEF6);
+  border-radius: 8px;
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.filter-toggle-btn:hover {
+  background: #f5f8fb;
+  box-shadow: 0 4px 12px rgba(11,34,64,0.15);
+}
+
+.filter-toggle-btn .filter-icon {
+  font-size: 1rem;
+}
+
+.filter-toggle-btn .filter-count {
+  background: #0F5AA8;
+  color: #fff;
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-left: 4px;
+}
+
+/* Filter Overlay */
+.filter-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 299;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s, visibility 0.3s;
+}
+
+.filter-overlay.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Filter Panel (Floating) */
+.filter-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 280px;
+  background: #fff;
+  z-index: 300;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+  box-shadow: 4px 0 20px rgba(11,34,64,0.15);
+  display: flex;
+  flex-direction: column;
+}
+
+.filter-panel.open {
+  transform: translateX(0);
+}
+
+.filter-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--line, #E6EEF6);
+  flex-shrink: 0;
+}
+
+.filter-panel-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.filter-close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+  padding: 4px;
+  line-height: 1;
+}
+
+.filter-close-btn:hover {
+  color: #333;
+}
+
+.filter-panel-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.filter-panel-content .sidebar {
+  position: static;
+  max-height: none;
+  overflow: visible;
+  padding: 0;
+  border: none;
+  box-shadow: none;
+}
+
+/* Left Panel: School List only */
 .left-panel {
-  display: grid;
-  grid-template-columns: 240px 1fr;
-  gap: 24px;
+  display: flex;
+  flex-direction: column;
   overflow-y: auto;
   overflow-x: hidden;
   padding-right: 8px;
+  max-height: calc(100vh - 160px);
   /* Custom scrollbar */
   scrollbar-width: thin;
   scrollbar-color: #c5d3e0 transparent;
@@ -70,33 +217,6 @@
 .left-panel::-webkit-scrollbar-thumb {
   background-color: #c5d3e0;
   border-radius: 3px;
-}
-
-/* Filter Wrapper - Sticky within left panel */
-.filter-wrapper {
-  position: sticky;
-  top: 0;
-  align-self: start;
-  max-height: calc(100vh - 200px);
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: #c5d3e0 transparent;
-}
-
-.filter-wrapper::-webkit-scrollbar {
-  width: 4px;
-}
-
-.filter-wrapper::-webkit-scrollbar-thumb {
-  background-color: #d0dce8;
-  border-radius: 2px;
-}
-
-/* Override sidebar styles for this context */
-.filter-wrapper .sidebar {
-  position: static;
-  max-height: none;
-  overflow: visible;
 }
 
 /* School List */
@@ -118,6 +238,7 @@
   overflow-y: auto;
   overflow-x: hidden;
   padding-right: 4px;
+  max-height: calc(100vh - 160px);
   scrollbar-width: thin;
   scrollbar-color: #c5d3e0 transparent;
 }
@@ -143,16 +264,119 @@
   overflow: visible;
 }
 
+/* Middle Panel: Department List */
+.middle-panel {
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
+  max-height: calc(100vh - 160px);
+  scrollbar-width: thin;
+  scrollbar-color: #c5d3e0 transparent;
+}
+
+.middle-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.middle-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.middle-panel::-webkit-scrollbar-thumb {
+  background-color: #c5d3e0;
+  border-radius: 3px;
+}
+
+/* Department Panel Styles */
+.department-panel {
+  background: #fff;
+  border: 1px solid var(--line, #E6EEF6);
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 4px 10px rgba(11,34,64,0.04);
+}
+
+.department-items {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.department-item {
+  padding: 0.5rem 0.6rem;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+}
+
+.department-item .dept-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.department-item .dept-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.department-item:hover {
+  background-color: #f5f8fb;
+}
+
+.department-item.selected {
+  background-color: #f0f7ff;
+  border-left: 3px solid #0F5AA8;
+  margin-left: -3px;
+}
+
+.department-item .dept-name {
+  font-weight: 500;
+  color: #333;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.department-item .dept-college {
+  font-size: 0.7rem;
+  color: #888;
+}
+
+.department-item .dept-tag {
+  font-size: 0.65rem !important;
+  padding: 0.1rem 0.35rem !important;
+  margin: 0 !important;
+  white-space: nowrap;
+}
+
+.department-item .dept-pending {
+  font-size: 0.65rem;
+  color: #ff9800;
+  font-style: italic;
+}
+
 /* Responsive */
 @media (max-width: 1200px) {
   .results-main {
-    grid-template-columns: minmax(400px, 2fr) minmax(320px, 1fr);
-    padding: 20px 24px 30px;
+    grid-template-columns: minmax(260px, 2fr) minmax(140px, 0.7fr) minmax(220px, 0.9fr);
+    padding: 20px 16px 30px;
   }
   
   .left-panel {
-    grid-template-columns: 220px 1fr;
-    gap: 16px;
+    padding-left: 50px;
   }
 }
 
@@ -184,22 +408,38 @@
     display: flex;
     flex-direction: column;
     overflow: visible;
+    padding-left: 50px;
   }
   
-  .filter-wrapper {
-    position: static;
-    max-height: none;
+  .filter-toggle-btn {
+    left: 12px;
+    top: 70px;
+  }
+  
+  .middle-panel {
     overflow: visible;
+    margin-top: 16px;
   }
   
   .right-panel {
     overflow: visible;
-    margin-top: 24px;
+    margin-top: 16px;
   }
 }
 
 @media (max-width: 768px) {
   .results-main {
     padding: 12px;
+    padding-left: 50px;
+  }
+  
+  .left-panel {
+    padding-left: 0;
+  }
+  
+  .filter-toggle-btn {
+    left: 8px;
+    top: 65px;
+    padding: 6px 10px;
   }
 }
